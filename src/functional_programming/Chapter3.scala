@@ -7,6 +7,10 @@ sealed trait List[+A]
 case object Nil extends List[Nothing]
 case class Cons[+A](head: A, tail: List[A]) extends List[A]
 
+sealed trait Tree[+A]
+case class Leaf[A](value: A) extends Tree[A]
+case class Branch[A](left: Tree[A], right: Tree[A]) extends Tree[A]
+
 //companion object
 object List {
 
@@ -67,6 +71,38 @@ object List {
       }
   }
 
+  def sumList[A](l1: List[A], l2: List[A])(f: (A, A) => A): List[A] = l1 match {
+    case Nil => Nil
+    case Cons(a, b) => {
+      l2 match {
+        case Cons(c, d) => {
+          Cons(f(a, c), sumList(b, d)(f))
+        }
+      }
+    }
+  }
+}
+
+object Tree {
+    def count[A](t: Tree[A]): Int = t match {
+      case Leaf(_) => 1
+      case Branch(l, r) => count(l) + count(r) + 1
+    }
+
+  def maximum[A](t: Tree[A]): Int = t match {
+    case Leaf(_) => _
+    case Branch(l, r) => maximum(l).max(maximum(r))
+  }
+
+  def maxDepth[A](t: Tree[A]): Int = t match {
+    case Leaf(_) => 0
+    case Branch(l, r) => maxDepth(l).max(maxDepth(r)) + 1
+  }
+
+  def fold[A](t: Tree[A], a: A)(f:(A, A) => A): A = t match {
+    case Leaf(_) => a
+    case Branch(l, r) => f(fold(l, a)(f), fold(r, a)(f))
+  }
 }
 
 object Chapter3 extends App{
@@ -99,5 +135,8 @@ object Chapter3 extends App{
 
   val oddNumbers = List.filter(List(1, 2, 3, 4, 5, 6, 7, 7))(x => (x % 2) == 0)
   println(s"Map result:  ${oddNumbers}")
+
+  val sumOfTwoList = List.sumList(List(1, 2, 3), List(4, 5, 5))((x, y) => x + y)
+  println(s"Sum of two lists:  ${sumOfTwoList}")
 
 }
