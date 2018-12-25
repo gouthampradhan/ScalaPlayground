@@ -89,8 +89,8 @@ object Tree {
       case Branch(l, r) => count(l) + count(r) + 1
     }
 
-  def maximum[A](t: Tree[A]): Int = t match {
-    case Leaf(_) => _
+  def maximum(t: Tree[Int]): Int = t match {
+    case Leaf(a) => a
     case Branch(l, r) => maximum(l).max(maximum(r))
   }
 
@@ -140,3 +140,4 @@ object Chapter3 extends App{
   println(s"Sum of two lists:  ${sumOfTwoList}")
 
 }
+
