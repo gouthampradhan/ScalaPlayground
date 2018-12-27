@@ -60,6 +60,10 @@ object List {
     case Cons(x, y) => Cons(f(x), map(y)(f))
   }
 
+  def flatMap[A,B](as: List[A])(f: A => List[B]): List[B] = as match {
+    case Nil => Nil
+    case Cons(x, y) => merge(f(x), flatMap(y)(f))
+  }
 
   def filter[A](as: List[A])(f: A => Boolean): List[A] = as match {
     case Nil => Nil

@@ -1,5 +1,8 @@
 package functional_programming
 
+import scala.reflect.internal.Trees
+import scala.util.Try
+
 /**
   * Created by gouthamvidyapradhan on 22/12/2018
   */
@@ -50,5 +53,60 @@ object Test extends App{
   }
 
   println(s"Varience is ${variance(Seq()).flatMap(x => Some(x))}")
+
+  def map2[A,B,C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] =
+    a flatMap (aa =>
+      b map (bb =>
+        f(aa, bb)))
+
+  def parseInsuranceRateQuote(age: String, numberOfSpeedingTickets: String): Option[Double] = {
+    val optAge: Option[Int] = Try {age.toInt}
+    val optNoSpeedingTickets: Option[Int] = Try {numberOfSpeedingTickets.toInt}
+    map2(optAge, optNoSpeedingTickets)(insuranceRateQuote)
+  }
+
+  def insuranceRateQuote(age: Int, numberOfSpeedingTickets: Int): Int = {
+    //dummy value
+    1750
+  }
+
+  println(s"Result of map2:${map2(Some(1), Some(2))(insuranceRateQuote)}")
+
+  def Try[A](a: => A): Option[A] = {
+    try Some(a)
+    catch{
+      case e: Exception => None
+    }
+  }
+
+  /*def sequence[A](a: List[Option[A]]): Option[List[A]] = {
+    def go(a: List[Option[A]], list: List[A]): Option[List[A]] = a match {
+      case Nil => Some(list)
+
+      case Cons(x, y) => x match {
+        case None => None
+        case Some(a) => go(y, Cons(a, list))
+      }
+    }
+    go(a, List())
+  }*/
+
+  def sequence[A](a: List[Option[A]]): Option[List[A]] = {
+    def go(a: List[Option[A]], list: List[A]): Option[List[A]] = a match {
+    case Nil => Some(list)
+    case Cons(x, y) => x.flatMap(z => go(y, Cons(z, list)))
+    }
+    go(a, List())
+  }
+
+  val list = List(Some(1), Some(2), Some(3))
+  val result = sequence(list)
+  println(result.getOrElse(List("Empty List")))
+
+
+  def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] = {
+    sequence(List.map(a)(f))
+  }
 }
+
 
