@@ -1,6 +1,6 @@
 package functional_programming.Chapter7
 
-import functional_programming.{List, Nil, None, Option, Some}
+import scala.collection.immutable._
 
 trait Monoid[A] {
   def op(op1: A, op2: A): A
