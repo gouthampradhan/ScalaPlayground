@@ -49,7 +49,7 @@ object Chapter7 extends App {
 
   def optionMonoid[A]: Monoid[Option[A]] = new Monoid[Option[A]] {
     override def op(op1: Option[A], op2: Option[A]): Option[A] = {
-     op1 orElse op2
+      op1 orElse op2
     }
     override def zero: Option[A] = None
   }
@@ -60,8 +60,8 @@ object Chapter7 extends App {
   }
 
   def endoFunction[A]: Monoid[A => A] = new Monoid[A => A] {
-    override def op(op1: A => A, op2: A => A): A => A = {
-      a: A => op1(op2(a))
+    override def op(op1: A => A, op2: A => A): A => A = { a: A =>
+      op1(op2(a))
     }
     override def zero: A => A = (a: A) => a
   }
@@ -70,46 +70,51 @@ object Chapter7 extends App {
     as.foldRight(m.zero)(m.op)
   }
 
-  def foldMap[A,B](as: List[A], m: Monoid[B])(f: A => B): B = {
+  def foldMap[A, B](as: List[A], m: Monoid[B])(f: A => B): B = {
     as.map(f).foldLeft(m.zero)(m.op)
   }
 
-  def foldMapV[A,B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): B = {
-    if(v.isEmpty) m.zero
-    else if(v.length == 1) f(v(0))
+  def foldMapV[A, B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): B = {
+    if (v.isEmpty) m.zero
+    else if (v.length == 1) f(v(0))
     else {
       val tuple = v.splitAt(v.length / 2)
-      m.op(tuple._1.map(f).foldLeft(m.zero)(m.op), tuple._2.map(f).foldLeft(m.zero)(m.op))
+      m.op(tuple._1.map(f).foldLeft(m.zero)(m.op),
+           tuple._2.map(f).foldLeft(m.zero)(m.op))
     }
   }
 
   def isOrdered(xs: IndexedSeq[Int]): Boolean = {
 
-    val ascMonoid: Monoid[Option[(Int, Int, Boolean)]] = new Monoid[Option[(Int, Int, Boolean)]] {
-      override def op(op1: Option[(Int, Int, Boolean)], op2: Option[(Int, Int, Boolean)]): Option[(Int, Int, Boolean)] = {
-        op1 match {
-          case None => op2
-          case Some(x) => op2 match {
-            case None => op1
-            case Some(y) => {
-              if(!x._3 || !y._3) {
-                Some((-1, -1, false))
-              }
-              else{
-                if(x._2 <= y._1){
-                  Some(x._1, y._2, true)
-                } else{
-                  Some((-1, -1, false))
+    val ascMonoid: Monoid[Option[(Int, Int, Boolean)]] =
+      new Monoid[Option[(Int, Int, Boolean)]] {
+        override def op(
+            op1: Option[(Int, Int, Boolean)],
+            op2: Option[(Int, Int, Boolean)]): Option[(Int, Int, Boolean)] = {
+          op1 match {
+            case None => op2
+            case Some(x) =>
+              op2 match {
+                case None => op1
+                case Some(y) => {
+                  if (!x._3 || !y._3) {
+                    Some((-1, -1, false))
+                  } else {
+                    if (x._2 <= y._1) {
+                      Some(x._1, y._2, true)
+                    } else {
+                      Some((-1, -1, false))
+                    }
+                  }
                 }
               }
-            }
           }
         }
-      }
 
-      override def zero: Option[(Int, Int, Boolean)] = None
-    }
-    val result = xs.map(x => Some(x, x, true)).foldLeft(ascMonoid.zero)(ascMonoid.op)
+        override def zero: Option[(Int, Int, Boolean)] = None
+      }
+    val result =
+      xs.map(x => Some(x, x, true)).foldLeft(ascMonoid.zero)(ascMonoid.op)
     result.getOrElse((-1, -1, false))._3
   }
 

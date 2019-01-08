@@ -2,3 +2,4 @@
 .idea/
 ScalaPlayground.iml
 out/
+target/
