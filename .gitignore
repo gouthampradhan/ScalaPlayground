@@ -3,3 +3,4 @@
 ScalaPlayground.iml
 out/
 target/
+*.[class]

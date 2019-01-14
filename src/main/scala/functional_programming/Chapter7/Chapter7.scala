@@ -119,4 +119,39 @@ object Chapter7 extends App {
   }
 
   println("ordered result is: " + isOrdered(IndexedSeq(1, 2, 5, 5, 55, 667)))
+
+  trait Functor[F[_]] {
+    def map[A,B](fa: F[A])(f: A => B): F[B]
+  }
+
+  trait Monad[F[_]] extends Functor[F] {
+    def unit[A](a: => A): F[A]
+    def flatMap[A,B](ma: F[A])(f: A => F[B]): F[B]
+    def map[A,B](ma: F[A])(f: A => B): F[B] = {
+      flatMap(ma)((x: A) => unit(f(x)))
+    }
+    def map2[A,B,C](ma: F[A], mb: F[B])(f: (A, B) => C): F[C] = {
+      flatMap(ma)((a: A) => flatMap(mb)((b: B) => unit(f(a, b))))
+    }
+
+    def sequence[A](lma: List[F[A]]): F[List[A]] = {
+      lma.foldRight(unit(List[A]()))((a, la) => map2(a, la)(_ :: _))
+    }
+
+    def traverse[A,B](la: List[A])(f: A => F[B]): F[List[B]] = {
+      la.foldRight(unit(List[B]()))((a, flb) => map2(f(a), flb)(_ :: _))
+    }
+
+    def replicateM[A](n: Int, ma: F[A]): F[List[A]] = {
+      sequence(List.fill(n)(ma))
+    }
+  }
+
+  val listMonad = new Monad[List] {
+    def unit[A](a: => A) = List(a)
+    override def flatMap[A,B](ma: List[A])(f: A => List[B]) = ma flatMap f
+  }
+
+  val result = listMonad.sequence(List(List(1, 2), List(2), List(4)))
+  println(result)
 }
