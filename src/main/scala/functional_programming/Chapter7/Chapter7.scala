@@ -145,6 +145,9 @@ object Chapter7 extends App {
     def replicateM[A](n: Int, ma: F[A]): F[List[A]] = {
       sequence(List.fill(n)(ma))
     }
+
+    def filterM[A](ms: List[A])(f: A => F[Boolean]): F[List[A]] = ???
+
   }
 
   val listMonad = new Monad[List] {
